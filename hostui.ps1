@@ -7,7 +7,7 @@ $PwshWindow.WindowTitle = "Hello Mate!"
 # Get window size ready for new values
 $NewSize = $PwshWindow.WindowSize
 # Set new desired values
-$NewSize.Height = 60
-$NewSize.Width = 60
+$NewSize.Height = 50
+$NewSize.Width = 50
 # Set the window size on the window
 $PwshWindow.WindowSize = $NewSize
