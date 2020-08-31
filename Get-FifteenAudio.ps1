@@ -1,6 +1,6 @@
-﻿Function Get-Music {
+﻿Function Get-FifteenAudio {
 
-    param()
+    $AudioDir = "D:\Audio"
 
     $searching = $True
     While ($searching) {
@@ -9,42 +9,41 @@
         }
         Add-Type -AssemblyName presentationCore
         $WindowsMediaPlayer = New-Object System.Windows.Media.MediaPlayer
-        $Artists = Get-ChildItem "F:\Audio" -Directory
+        $Artists = Get-ChildItem $AudioDir -Directory
         # $Artists.Count
-        cls
+        
+        Clear-Host
         $SearchArtist = Read-Host -Prompt "Search for an Artist"
         $PlayMe = "fail"
         foreach ($Artist in $Artists) {
             $ArtistName = $Artist.Name
             if ($ArtistName -like $SearchArtist) {
                 $SearchArtist = $ArtistName
-                $SelectOne = Get-ChildItem "F:\Audio\$SearchArtist" | Out-GridView -OutputMode Single -Title "Searching: $SearchArtist"
+                $SelectOne = Get-ChildItem "$AudioDir\$SearchArtist" | Out-GridView -OutputMode Single -Title "Searching: $SearchArtist"
                 $SelectOneName = $SelectOne.Name
                 $SelectOneType = $SelectOne.Mode
-                if ($SelectOneType -like "d-----") {
-                    $SelectTwo = Get-ChildItem "F:\Audio\$SearchArtist\$SelectOneName" | Out-GridView -OutputMode Single -Title "Searching: $SearchArtist\$SelectOneName"
+                if ($SelectOneType -like "d----") {
+                    $SelectTwo = Get-ChildItem "$AudioDir\$SearchArtist\$SelectOneName" | Out-GridView -OutputMode Single -Title "Searching: $SearchArtist\$SelectOneName"
                     $SelectTwoName = $SelectTwo.Name
                     $SelectTwoType = $SelectTwo.Mode
-                    if ($SelectTwoType -like "d-----") {
+                    if ($SelectTwoType -like "d----") {
                         Write-Host "Too Far Down" -ForegroundColor Yellow
-                    } elseif ($SelectTwoType -like "-a----") {
-                        $PlayMe = "F:\Audio\$SearchArtist\$SelectOneName\$SelectTwoName"
+                    } elseif ($SelectTwoType -like "-a---") {
+                        $PlayMe = "$AudioDir\$SearchArtist\$SelectOneName\$SelectTwoName"
                         $searching = $False
-                        Get-MediaPlayer
+                        Get-FifteenMediaPlayer -PlayMe $PlayMe -WindowsMediaPlayer $WindowsMediaPlayer
                     }
-                } elseif ($SelectOneType -like "-a----") {
-                    $PlayMe = "F:\Audio\$SearchArtist\$SelectOneName"
+                } elseif ($SelectOneType -like "-a---") {
+                    $PlayMe = "$AudioDir\$SearchArtist\$SelectOneName"
                     $searching = $False
-                    Get-MediaPlayer
+                    Get-FifteenMediaPlayer -PlayMe $PlayMe -WindowsMediaPlayer $WindowsMediaPlayer
                 }
             }
         }
     }
 }
 
-Function Get-MediaPlayer {
-
-    param()
+Function Get-FifteenMediaPlayer($PlayMe, $WindowsMediaPlayer) {
     
     $Host.UI.RawUI.WindowTitle = "Fifteen Media Player"
     $OldWindow = $Host.UI.RawUI
@@ -61,8 +60,9 @@ Function Get-MediaPlayer {
     $TrackName = $TrackName | Select-Object -Last 1
     Start-Sleep 2 # This allows the $wmplayer time to load the audio file
     $Duration = $WindowsMediaPlayer.NaturalDuration.TimeSpan.TotalSeconds
-    cls
-    Write-Host "Now Playing... $TrackName by $SearchArtist" -ForegroundColor Magenta
+    
+    Clear-Host
+    Write-Host "Now Playing... $TrackName by $SearchArtist ($Duration)" -ForegroundColor Magenta
     $WindowsMediaPlayer.Play()
     $continue = $True
     $playpause = 'Pause     '
@@ -92,12 +92,12 @@ Function Get-MediaPlayer {
                 Start-Sleep 0.6
                 $SongPositionTwo = $WindowsMediaPlayer.Position
                 if ($SongPositionOne -lt $SongPositionTwo) {
-                    cls
+                    Clear-Host
                     Write-Host "Paused Music... $TrackName by $SearchArtist" -ForegroundColor Magenta
                     $WindowsMediaPlayer.Pause()
                     $playpause = 'Play      '
                 } else {
-                    cls
+                    Clear-Host
                     Write-Host "Now Playing... $TrackName by $SearchArtist" -ForegroundColor Magenta
                     $WindowsMediaPlayer.Play()
                     $playpause = 'Pause     '
@@ -105,20 +105,20 @@ Function Get-MediaPlayer {
                 }
             }
             'S' {
-                cls
+                Clear-Host
                 Write-Host "Stopped Music... $TrackName by $SearchArtist" -ForegroundColor Magenta
                 $WindowsMediaPlayer.Stop()
                 $playpause = 'Play      '
                 $stopped = 'stopped'
             }
             'N' {
-                cls
+                Clear-Host
                 $WindowsMediaPlayer.Stop()
                 $WindowsMediaPlayer.Close()
-                Get-Music
+                Get-FifteenAudio
             }
             'X' {
-                cls
+                Clear-Host
                 try {
                     $WindowsMediaPlayer.Stop()
                 }
@@ -142,9 +142,4 @@ Function Get-MediaPlayer {
     }
 }
 
-Function Play-Music {
-
-    param()
-    
-    Get-Music
-}
+Get-FifteenAudio
