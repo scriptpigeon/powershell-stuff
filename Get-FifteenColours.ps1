@@ -1,7 +1,7 @@
 ﻿Function Get-FifteenRandomColour {
 
-    $Colours = @("Magenta","Red","Yellow","Green","Cyan","Gray","White")
-    $Random = Get-Random -Maximum $($Colours.Count -1) -Minimum 0
+    $Colours = @("Magenta", "Red", "Yellow", "Green", "Cyan", "Gray", "White")
+    $Random = Get-Random -Maximum $($Colours.Count - 1) -Minimum 0
     Return $Colours[$Random]
 
 }
@@ -19,7 +19,7 @@ Function Get-FifteenRandomColourText($Text) {
 Function Get-FifteenRainbowText($Text) {
 
     $i = 0
-    $Colours = @("Magenta","Red","Yellow","Green","Cyan","Gray","White")
+    $Colours = @("Magenta", "Red", "Yellow", "Green", "Cyan", "Gray", "White")
 
     [char[]]$Text | ForEach-Object {
 

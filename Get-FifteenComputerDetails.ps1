@@ -10,27 +10,27 @@ Function Get-FifteenComputerDetails {
     Write-Host "CPU Count: $($AllProcessor.Count)" -ForegroundColor Cyan
     $CPUNumber = 1
     foreach ($Processor in $AllProcessor) {
-    Write-Host "CPU $CPUNumber Name: $($Processor.Name)" -ForegroundColor Cyan
-    Write-Host "CPU $CPUNumber No. of Cores: $($Processor.NumberOfCores)" -ForegroundColor Cyan
-    Write-Host "CPU $CPUNumber Status: $($Processor.Status)" -ForegroundColor Cyan
-    $CPUNumber++
+        Write-Host "CPU $CPUNumber Name: $($Processor.Name)" -ForegroundColor Cyan
+        Write-Host "CPU $CPUNumber No. of Cores: $($Processor.NumberOfCores)" -ForegroundColor Cyan
+        Write-Host "CPU $CPUNumber Status: $($Processor.Status)" -ForegroundColor Cyan
+        $CPUNumber++
     }
     if ($AllMemory.Count -eq 1) {
-    Write-Host "Memory: $($AllMemory.Capacity / 1GB)GB" -ForegroundColor Cyan
+        Write-Host "Memory: $($AllMemory.Capacity / 1GB)GB" -ForegroundColor Cyan
     }
     elseif ($AllMemory.Count -gt 1) {
-    $TotalMemoryCapacity = 0
-    foreach ($Memory in $AllMemory) {
-        $MemoryCapacity = ($Memory.Capacity / 1GB)
-        if ($TotalMemoryCapacity -eq 0) {
-        $MemoryCapacityDisplay = "$($MemoryCapacity)GB"
+        $TotalMemoryCapacity = 0
+        foreach ($Memory in $AllMemory) {
+            $MemoryCapacity = ($Memory.Capacity / 1GB)
+            if ($TotalMemoryCapacity -eq 0) {
+                $MemoryCapacityDisplay = "$($MemoryCapacity)GB"
+            }
+            else {
+                $MemoryCapacityDisplay = "$MemoryCapacityDisplay + $($MemoryCapacity)GB"
+            }
+            $TotalMemoryCapacity = $TotalMemoryCapacity + $MemoryCapacity
         }
-        else {
-        $MemoryCapacityDisplay = "$MemoryCapacityDisplay + $($MemoryCapacity)GB"
-        }
-        $TotalMemoryCapacity = $TotalMemoryCapacity + $MemoryCapacity
-    }
-    Write-Host "Memory: $($TotalMemoryCapacity)GB ($MemoryCapacityDisplay)" -ForegroundColor Cyan
+        Write-Host "Memory: $($TotalMemoryCapacity)GB ($MemoryCapacityDisplay)" -ForegroundColor Cyan
     }
     Write-Host "Machine Manufacturer: $($Machine.Manufacturer)" -ForegroundColor Cyan
     Write-Host "Machine Model: $($Machine.Model)" -ForegroundColor Cyan
@@ -49,17 +49,17 @@ Function Get-FifteenComputerDetails {
     Write-Host "Disk Count: $($AllDisks.Count)" -ForegroundColor Cyan
     $DiskNumber = 1
     foreach ($Disk in $AllDisks) {
-    $DiskSize = [int][Math]::Round($Disk.Size / 1GB)
-    $DiskFreeSpace = [int][Math]::Round($Disk.FreeSpace / 1GB)
-    $DiskUsedSpace = $DiskSize - $DiskFreeSpace
-    $DiskPercentRemaining = [int][Math]::Round(($DiskFreeSpace / $DiskSize) * 100)
-    Write-Host "Disk $DiskNumber ID: $($Disk.DeviceID) ($($Disk.VolumeName))" -ForegroundColor Cyan
-    Write-Host "Disk $DiskNumber FileSystem: $($Disk.FileSystem)" -ForegroundColor Cyan
-    Write-Host "Disk $DiskNumber Used: $($DiskUsedSpace)GB" -ForegroundColor Cyan
-    Write-Host "Disk $DiskNumber Free: $($DiskFreeSpace)GB" -ForegroundColor Cyan
-    Write-Host "Disk $DiskNumber Size: $($DiskSize)GB" -ForegroundColor Cyan
-    Write-Host "Disk $DiskNumber Percent Free: $($DiskPercentRemaining)%" -ForegroundColor Cyan
-    $DiskNumber++
+        $DiskSize = [int][Math]::Round($Disk.Size / 1GB)
+        $DiskFreeSpace = [int][Math]::Round($Disk.FreeSpace / 1GB)
+        $DiskUsedSpace = $DiskSize - $DiskFreeSpace
+        $DiskPercentRemaining = [int][Math]::Round(($DiskFreeSpace / $DiskSize) * 100)
+        Write-Host "Disk $DiskNumber ID: $($Disk.DeviceID) ($($Disk.VolumeName))" -ForegroundColor Cyan
+        Write-Host "Disk $DiskNumber FileSystem: $($Disk.FileSystem)" -ForegroundColor Cyan
+        Write-Host "Disk $DiskNumber Used: $($DiskUsedSpace)GB" -ForegroundColor Cyan
+        Write-Host "Disk $DiskNumber Free: $($DiskFreeSpace)GB" -ForegroundColor Cyan
+        Write-Host "Disk $DiskNumber Size: $($DiskSize)GB" -ForegroundColor Cyan
+        Write-Host "Disk $DiskNumber Percent Free: $($DiskPercentRemaining)%" -ForegroundColor Cyan
+        $DiskNumber++
     }
 
 }

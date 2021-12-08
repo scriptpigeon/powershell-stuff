@@ -1,7 +1,7 @@
 Function Out-FifteenGrid() {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true)][array]$Data,
+        [Parameter(Mandatory = $true)][array]$Data,
         [ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Grey', 'DarkGrey', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')][string]$GridColour = $Host.UI.RawUI.ForegroundColor,
         [ValidateSet('Black', 'DarkBlue', 'DarkGreen', 'DarkCyan', 'DarkRed', 'DarkMagenta', 'DarkYellow', 'Grey', 'DarkGrey', 'Gray', 'DarkGray', 'Blue', 'Green', 'Cyan', 'Red', 'Magenta', 'Yellow', 'White')][string]$HeaderColour = $Host.UI.RawUI.ForegroundColor,
         [array]$Headings,
@@ -10,26 +10,26 @@ Function Out-FifteenGrid() {
     )
     # Some Default Settings to adjust in one place for this function
     $IgnoreThisColourColumnName = "Colour" # "Colour"
-    $VerticalGridChar           = "|"      # "|""
-    $CornerGridChar             = "+"      # "+""
-    $HorizontalGridChar         = "-"      # "-"
-    $PaddingGridChar            = " "      # " "
+    $VerticalGridChar = "|"      # "|""
+    $CornerGridChar = "+"      # "+""
+    $HorizontalGridChar = "-"      # "-"
+    $PaddingGridChar = " "      # " "
     # I'm British, but this is American! :(
     $GridColour = $GridColour.Replace('Grey', 'Gray')
     $HeaderColour = $HeaderColour.Replace('Grey', 'Gray')
     # Prepare for invalid colours found
     $ShowError = @()
     # Build array of valid colours
-    $AllColours = [enum]::GetValues([System.ConsoleColor]) | Where-Object {$_ -ne $Host.UI.RawUI.BackgroundColor}
+    $AllColours = [enum]::GetValues([System.ConsoleColor]) | Where-Object { $_ -ne $Host.UI.RawUI.BackgroundColor }
     # Get default foreground colour
     $DefaultColour = "$($Host.UI.RawUI.ForegroundColor)"
     # Override grid colour if not in list of approved colours or matches default background colour
-    if (!($AllColours | Where-Object {$_ -eq $GridColour}) -or $Host.UI.RawUI.BackgroundColor -eq $GridColour) {
+    if (!($AllColours | Where-Object { $_ -eq $GridColour }) -or $Host.UI.RawUI.BackgroundColor -eq $GridColour) {
         $ShowError += $GridColour
         $GridColour = $DefaultColour
     }
     # Override headers colour if not in list of approved colours or matches default background colour
-    if (!($AllColours | Where-Object {$_ -eq $HeaderColour}) -or $Host.UI.RawUI.BackgroundColor -eq $HeaderColour) {
+    if (!($AllColours | Where-Object { $_ -eq $HeaderColour }) -or $Host.UI.RawUI.BackgroundColor -eq $HeaderColour) {
         $ShowError += $HeaderColour
         $HeaderColour = $DefaultColour
     }
@@ -41,9 +41,9 @@ Function Out-FifteenGrid() {
     $PaddedHeadings = @()
     foreach ($H in $Headings) {
         Remove-Variable -Name "MaxLength$H" -Force -Confirm:$false -ErrorAction SilentlyContinue
-        New-Variable -Name "MaxLength$H" -Value ($Data.$H | ForEach-Object {$_.Length} | Sort-Object -Descending | Select-Object -First 1)
+        New-Variable -Name "MaxLength$H" -Value ($Data.$H | ForEach-Object { $_.Length } | Sort-Object -Descending | Select-Object -First 1)
         if ($H -ne $IgnoreThisColourColumnName -or ($H -eq $IgnoreThisColourColumnName -and $ShowColourColumn)) {
-            $PaddedHeadings += $H | Select-Object @{l='Name';e={$_}}, @{l='Heading';e={(([string]$_).PadRight((Get-Variable -Name "MaxLength$H" -ValueOnly), "$PaddingGridChar"))}}
+            $PaddedHeadings += $H | Select-Object @{l = 'Name'; e = { $_ } }, @{l = 'Heading'; e = { (([string]$_).PadRight((Get-Variable -Name "MaxLength$H" -ValueOnly), "$PaddingGridChar")) } }
         }
     }
     # Created Full Heading
@@ -52,7 +52,7 @@ Function Out-FifteenGrid() {
     $HLine = "$CornerGridChar"
     $PaddedHeadings.Heading | ForEach-Object {
         $HLine = "$HLine$HorizontalGridChar"
-        for ($HL = 1;$HL -le ($_.Length);$HL++) {
+        for ($HL = 1; $HL -le ($_.Length); $HL++) {
             $HLine = "$HLine$HorizontalGridChar"
         }
         $HLine = "$HLine$HorizontalGridChar$CornerGridChar"
@@ -63,7 +63,8 @@ Function Out-FifteenGrid() {
         # Pipes are part of your grid
         if ($Char -eq $VerticalGridChar) {
             $CharColour = $GridColour
-        } else {
+        }
+        else {
             $CharColour = $HeaderColour
         }
         Write-Host $Char -ForegroundColor $CharColour -NoNewline
@@ -84,11 +85,13 @@ Function Out-FifteenGrid() {
             # Pipes are part of your grid
             if ($Char -eq $VerticalGridChar) {
                 $CharColour = $GridColour
-            } else {
+            }
+            else {
                 # Check to see if we are ignoring the "Colour"
                 if ($IgnoreLineColour) {
                     $CharColour = $DefaultColour
-                } else {
+                }
+                else {
                     # See if "Colour" column was set in data and use value to write colourful data lines
                     Try {
                         Get-Variable "MaxLength$IgnoreThisColourColumnName" -ErrorAction Stop | Out-Null
@@ -97,7 +100,7 @@ Function Out-FifteenGrid() {
                             $ShowError += $D.Colour
                             $CharColour = $DefaultColour
                         }
-                        if (!($AllColours | Where-Object {$_ -eq $CharColour})) {
+                        if (!($AllColours | Where-Object { $_ -eq $CharColour })) {
                             $ShowError += $CharColour
                             $CharColour = $DefaultColour
                         }

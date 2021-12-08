@@ -6,17 +6,20 @@ Function Get-FifteenGreeting {
     $TimeHH = Get-Date -Format "HH"
     if ($AMPM -eq 'AM') {
         $Greeting = "Good Morning, $Username."
-    } elseif ($AMPM -eq 'PM' -and $TimeHH -lt '18') {
+    }
+    elseif ($AMPM -eq 'PM' -and $TimeHH -lt '18') {
         $Greeting = "Good Afternoon, $Username."
-    } elseif ($AMPM -eq 'PM' -and $TimeHH -gt '17') {
+    }
+    elseif ($AMPM -eq 'PM' -and $TimeHH -gt '17') {
         $Greeting = "Good Evening, $Username."
-    } else {
+    }
+    else {
         $Greeting = "Hello, $Username."
     }
     $FramedGreeting = "| $Greeting |"
     # Create Frame
     $Frame = "+-"
-    for ($i=0; $i -lt $Greeting.Length; $i++) {
+    for ($i = 0; $i -lt $Greeting.Length; $i++) {
         $Frame = $Frame + "-"
     }
     $Frame = $Frame + "-+"

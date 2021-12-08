@@ -29,12 +29,14 @@ Function Get-FifteenMacOS {
             if ($count -match 0) {
                 Write-Host "$ModulePath" -ForegroundColor Cyan
                 $count++
-            } else {
+            }
+            else {
                 Write-Host "                           $ModulePath" -ForegroundColor Cyan
             }
         }
 
-    } else {
+    }
+    else {
         Write-Host "No ($PSVersion)" -ForegroundColor "Red"
     }
 

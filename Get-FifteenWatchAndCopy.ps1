@@ -43,7 +43,8 @@ $Action = {
                 # Force Directory Location
                 New-Item -ItemType Directory -Force -Path $NewDestination
                 Write-Host "Done!" -ForegroundColor Green
-            } else {
+            }
+            else {
                 Write-Host "File ($Name) has changed! Forcing Destination Directory... " -ForegroundColor Yellow -NoNewline
                 # Force Parent Directory Location
                 New-Item -ItemType Directory -Force -Path $NewJustDir
@@ -71,7 +72,8 @@ $Action = {
                 # Force Directory Location
                 New-Item -ItemType Directory -Force -Path $NewDestination
                 Write-Host "Done!" -ForegroundColor Green
-            } else {
+            }
+            else {
                 Write-Host "File ($Name) has appeared! Forcing Destination Directory... " -ForegroundColor Yellow -NoNewline
                 # Force Parent Directory Location
                 New-Item -ItemType Directory -Force -Path $NewJustDir

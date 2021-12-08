@@ -12,7 +12,7 @@ Function Get-FifteenNetworkWatcher($MacAddress) {
     While ($DateNow -lt $24Hours) {
 
         Start-Sleep 1
-        $IntStatus = (Get-NetAdapter -Physical | Where-Object {$_.MacAddress -eq $MacAddress}).InterfaceOperationalStatus
+        $IntStatus = (Get-NetAdapter -Physical | Where-Object { $_.MacAddress -eq $MacAddress }).InterfaceOperationalStatus
 
         if ($IntStatus -eq 1) {
 
@@ -24,7 +24,7 @@ Function Get-FifteenNetworkWatcher($MacAddress) {
             do {
 
                 Start-Sleep 1
-                $IntStatus = (Get-NetAdapter -Physical | Where-Object {$_.MacAddress -eq $MacAddress}).InterfaceOperationalStatus
+                $IntStatus = (Get-NetAdapter -Physical | Where-Object { $_.MacAddress -eq $MacAddress }).InterfaceOperationalStatus
                 $StillConnectTime = Get-Date
                 Write-Host "* " -ForegroundColor Cyan -NoNewline
                 Write-Host "$StillConnectTime - Still Connected" -ForegroundColor Green -NoNewline
@@ -46,7 +46,8 @@ Function Get-FifteenNetworkWatcher($MacAddress) {
 
                 $TimeUp = "$SecondsUp Seconds"
 
-            } else {
+            }
+            else {
 
                 $RoundUp = [Math]::Round((240 / 60))
                 $TimeUp = "$RoundUp Minutes"

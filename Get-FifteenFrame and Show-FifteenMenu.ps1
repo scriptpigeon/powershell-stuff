@@ -1,4 +1,4 @@
-Function Get-FifteenFrame($MenuItems,$Colour) {
+Function Get-FifteenFrame($MenuItems, $Colour) {
     $BiggestLength = 0
     # Search for the biggest one ( oi, oi!)
     foreach ($MenuItem in $MenuItems) {
@@ -8,7 +8,7 @@ Function Get-FifteenFrame($MenuItems,$Colour) {
     }
     # Create Frame
     $Frame = "+-"
-    for ($i=0; $i -lt $BiggestLength; $i++) {
+    for ($i = 0; $i -lt $BiggestLength; $i++) {
         $Frame = $Frame + "-"
     }
     $Frame = $Frame + "-+"
@@ -17,7 +17,7 @@ Function Get-FifteenFrame($MenuItems,$Colour) {
     foreach ($MenuItem in $MenuItems) {
         $PaddingOffset = $BiggestLength - $MenuItem.Length
         $FramedMenuItem = "| $MenuItem"
-        for ($i=0; $i -lt $PaddingOffset; $i++) {
+        for ($i = 0; $i -lt $PaddingOffset; $i++) {
             $FramedMenuItem = $FramedMenuItem + " "
         }
         $FramedMenuItem = $FramedMenuItem + " |"
@@ -27,11 +27,11 @@ Function Get-FifteenFrame($MenuItems,$Colour) {
 }
 Function Show-FifteenMenu {
     $MenuItems = @(
-        "1: Press '1' for Option 1",`
-        "2: Press '2' for Option 2",`
-        "",`
-        "R: Press 'R' to Refresh.",`
-        "Q: Press 'Q' to Quit."
+        "1: Press '1' for Option 1", `
+            "2: Press '2' for Option 2", `
+            "", `
+            "R: Press 'R' to Refresh.", `
+            "Q: Press 'Q' to Quit."
     )
     Get-FifteenFrame -MenuItems $MenuItems -Colour "Cyan"
 }
@@ -55,8 +55,8 @@ Do {
                 $OptionSelection = 'r'
                 "Refreshing..." | Write-Host -ForegroundColor Cyan
             }
-            'r' {"Refreshing..." | Write-Host -ForegroundColor Cyan }
-            'q' {"Cya!" | Write-Host -ForegroundColor Cyan }
+            'r' { "Refreshing..." | Write-Host -ForegroundColor Cyan }
+            'q' { "Cya!" | Write-Host -ForegroundColor Cyan }
         }
     } Until ($OptionSelection -eq 'q' -or $OptionSelection -eq 'r')
     # Tidy up before closing here

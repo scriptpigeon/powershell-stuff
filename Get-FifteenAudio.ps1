@@ -28,12 +28,14 @@
                     $SelectTwoType = $SelectTwo.Mode
                     if ($SelectTwoType -like "d----") {
                         Write-Host "Too Far Down" -ForegroundColor Yellow
-                    } elseif ($SelectTwoType -like "-a---") {
+                    }
+                    elseif ($SelectTwoType -like "-a---") {
                         $PlayMe = "$AudioDir\$SearchArtist\$SelectOneName\$SelectTwoName"
                         $searching = $False
                         Get-FifteenMediaPlayer -PlayMe $PlayMe -WindowsMediaPlayer $WindowsMediaPlayer
                     }
-                } elseif ($SelectOneType -like "-a---") {
+                }
+                elseif ($SelectOneType -like "-a---") {
                     $PlayMe = "$AudioDir\$SearchArtist\$SelectOneName"
                     $searching = $False
                     Get-FifteenMediaPlayer -PlayMe $PlayMe -WindowsMediaPlayer $WindowsMediaPlayer
@@ -74,7 +76,8 @@ Function Get-FifteenMediaPlayer($PlayMe, $WindowsMediaPlayer) {
         Write-Host "** P. $playpause  **"
         if ($stopped -match "stopped") {
             
-        } else {
+        }
+        else {
             Write-Host "** S. Stop        **"
         }
         Write-Host "** N. New Search  **"
@@ -96,7 +99,8 @@ Function Get-FifteenMediaPlayer($PlayMe, $WindowsMediaPlayer) {
                     Write-Host "Paused Music... $TrackName by $SearchArtist" -ForegroundColor Magenta
                     $WindowsMediaPlayer.Pause()
                     $playpause = 'Play      '
-                } else {
+                }
+                else {
                     Clear-Host
                     Write-Host "Now Playing... $TrackName by $SearchArtist" -ForegroundColor Magenta
                     $WindowsMediaPlayer.Play()

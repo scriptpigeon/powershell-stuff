@@ -19,7 +19,7 @@
 
             $Host.UI.RawUI.CursorPosition = $Position
             $Characters = ($Length - $Count)
-            $Text.Substring(($ZeroCharacters * $Characters),$Count).Padleft(([int]!$ZeroCharacters * $Length),' ').Padright(($ZeroCharacters * $Length),' ')
+            $Text.Substring(($ZeroCharacters * $Characters), $Count).Padleft(([int]!$ZeroCharacters * $Length), ' ').Padright(($ZeroCharacters * $Length), ' ')
             Start-Sleep -Milliseconds 50
 
         }

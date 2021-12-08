@@ -27,7 +27,7 @@ Function Get-Settings() {
         [switch]$ConsoleBeep = $false,
         [int]$DisplayHeight = 40, # Window Height
         [int]$DisplayWidth = 200, # Window Width
-        [int]$EveningCutoff = 18,  # 24Hr Clock Start Evening
+        [int]$EveningCutoff = 18, # 24Hr Clock Start Evening
         [int]$MarginLeft = 2,
         [int]$MenuPanel = -1, # -1 = Last
         [int]$NoOfPanelsX = 3,
@@ -89,7 +89,8 @@ Function Get-Settings() {
     }
     if ($ConsoleBeep) {
         $Script:Beep = $true
-    } else {
+    }
+    else {
         $Script:Beep = $false
     }
     Write-Verbose "Console Beep: $($Beep)"
@@ -415,12 +416,14 @@ Function Write-Panel() {
         }
         if ($Panel -lt $NoOfPanelsX) {
             $X = $X[$Panel]
-        } else {
+        }
+        else {
             $X = $X[($NoOfPanelsX - 1)]
         }
         if ($Line -lt $WorkingHeight) {
             $Y = $Y[0] + $Line
-        } else {
+        }
+        else {
             $Y = $Y[0] + $WorkingHeight
         }
         if ($Horizontal) {
@@ -447,9 +450,11 @@ Function Set-Beep() {
     if (Confirm-Variable -Name "Beep") {
         if ($Disable) {
             $Script:Beep = $false
-        } elseif ($Enable) {
+        }
+        elseif ($Enable) {
             $Script:Beep = $true
-        } else {
+        }
+        else {
             $Script:Beep = $false
         }
     }
@@ -540,8 +545,8 @@ Function Set-Menu() {
     )
     if (Confirm-Variable -Name "Settings") {
         $Script:Menu = @()
-        $Script:Menu += $true | Select-Object @{l='Value';e={Get-Greeting}}, @{l='Line';e={0}}, @{l='TextColour';e={Optimize-Colour -Colour $TitleColour}}, @{l='Horizontal';e={$false}}
-        $Script:Menu += $true | Select-Object @{l='Value';e={$false}}, @{l='Line';e={2}}, @{l='TextColour';e={}}, @{l='Horizontal';e={$true}}
+        $Script:Menu += $true | Select-Object @{l = 'Value'; e = { Get-Greeting } }, @{l = 'Line'; e = { 0 } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TitleColour } }, @{l = 'Horizontal'; e = { $false } }
+        $Script:Menu += $true | Select-Object @{l = 'Value'; e = { $false } }, @{l = 'Line'; e = { 2 } }, @{l = 'TextColour'; e = {} }, @{l = 'Horizontal'; e = { $true } }
     }
 }
 
@@ -555,7 +560,8 @@ Function Get-Menu() {
         foreach ($M in $Menu) {
             if ($M.Horizontal) {
                 Write-Panel -Horizontal -Line $M.Line -Panel $Panel
-            } elseif ($M.Value) {
+            }
+            elseif ($M.Value) {
                 Write-Panel -Value $M.Value -Line $M.Line -Panel $Panel -TextColour $M.TextColour
             }
         }
@@ -573,7 +579,7 @@ Function Add-ToMenu() {
     )
     if (Confirm-Variable -Name "Settings", "Menu") {
         foreach ($V in $Value) {
-            $Script:Menu += $V | Select-Object @{l='Value';e={$_}}, @{l='Line';e={$Line}}, @{l='TextColour';e={Optimize-Colour -Colour $TextColour}}, @{l='Horizontal';e={$Horizontal}}
+            $Script:Menu += $V | Select-Object @{l = 'Value'; e = { $_ } }, @{l = 'Line'; e = { $Line } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TextColour } }, @{l = 'Horizontal'; e = { $Horizontal } }
         }
     }
 }
@@ -583,16 +589,16 @@ Get-Settings -Command -Username "Fifteen" -ConsoleBeep | Out-Null
 Start-Display
 Get-WorkAreas
 Set-Menu
-##### $l = 7
+$l = 7
 Do {
     Clear-Host
     Invoke-Borders
     Get-Menu
     Set-Cursor
     $Key = Get-PauseCommand
-    ##### Add-ToMenu -Value "Test $l" -Line $l -TextColour Red
-    ##### $l++
-    ##### $l++
-    ##### Add-ToMenu -Line $l -Horizontal
-    ##### $l++
+    Add-ToMenu -Value "Test $l" -Line $l -TextColour Red
+    $l++
+    $l++
+    Add-ToMenu -Line $l -Horizontal
+    $l++
 } Until ($Key -eq "Q")

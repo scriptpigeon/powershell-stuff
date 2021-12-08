@@ -5,7 +5,7 @@ Function Get-FifteenTalk([Int32]$Index, [Int32]$Rate, [String]$Words) {
 
     $Speaker.Rate = $Rate
     $Speaker.Voice = $Voices.Item($Index)
-    $Colour = switch($Index){0 {"Red"} 1 {"Green"}}
+    $Colour = switch ($Index) { 0 { "Red" } 1 { "Green" } }
     $Speaker.Speak($Words, 1) | Out-Null
     Write-Host $Words -ForegroundColor $Colour
     $Speaker.WaitUntilDone(600) | Out-Null

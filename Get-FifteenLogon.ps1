@@ -11,21 +11,24 @@ Function Get-FifteenLogon($Days) {
             # Logon Event Found
             $type = "Logon"
 
-        } elseif ($EventLog.instanceid -eq 7002) {
+        }
+        elseif ($EventLog.instanceid -eq 7002) {
 
             # Logoff Event Found
-            $type="Logoff"
+            $type = "Logoff"
 
-        } else {
+        }
+        else {
 
             Continue
 
         }
 
         $Results += New-Object PSObject -Property @{
-            Time = $EventLog.TimeWritten
+            Time    = $EventLog.TimeWritten
             "Event" = $type
-            User = (New-Object System.Security.Principal.SecurityIdentifier $EventLog.ReplacementStrings[1]).Translate([System.Security.Principal.NTAccount])}
+            User    = (New-Object System.Security.Principal.SecurityIdentifier $EventLog.ReplacementStrings[1]).Translate([System.Security.Principal.NTAccount])
+        }
 
     }
 
