@@ -45,21 +45,26 @@ Function Get-Settings() {
     $psWindow = $psHost.UI.RawUI
     # Check values
     if ($DisplayWidth -gt $psWindow.MaxWindowSize.Width) {
-        $DisplayWidth = $psWindow.MaxWindowSize.Widt
+        $DisplayWidth = $psWindow.MaxWindowSize.Width
     }
     if ($DisplayHeight -gt $psWindow.MaxWindowSize.Height) {
         $DisplayHeight = $psWindow.MaxWindowSize.Height
     }
     [int]$MarginTop = [System.Math]::Round($MarginLeft / 2, 0)
-    [int]$WorkingHeight = $DisplayHeight - (($MarginTop * 2) + ($Padding * 2) + 2 <# Border #>)
+    if ($Command) {
+        [int]$WorkingHeight = $DisplayHeight - (($MarginTop * 2) + ($Padding * 4) + 3 <# Border #>)
+    } else {
+        [int]$WorkingHeight = $DisplayHeight - (($MarginTop * 2) + ($Padding * 2) + 2 <# Border #>)
+    }
     if ($Command) {
         [int]$CommandX = $MarginLeft + 1 <# Border #> + $Padding
-        [int]$CommandY = $MarginTop + 1 <# Command Line Break #> + $WorkingHeight
+        [int]$CommandY = $MarginTop + 1 <# Border #> + $WorkingHeight + ($Padding * 3)
     }
     else {
         [bool]$CommandX = $false
         [bool]$CommandY = $false
     }
+    [int]$CommandWidth = ($WorkingWidth * $NoOfPanelsX) + ((1 <# Border #> + ($Padding * 2)) * ($NoOfPanelsX - 1))
     # Here you go
     $Script:Settings = @{
         BackgroundColour = Optimize-Colour -Colour $BackgroundColour
@@ -68,6 +73,7 @@ Function Get-Settings() {
         BorderCharV      = $BorderCharV
         BorderColour     = Optimize-Colour -Colour $BorderColour
         Command          = $Command
+        CommandWidth     = $CommandWidth
         CommandX         = $CommandX
         CommandY         = $CommandY
         DisplayHeight    = $DisplayHeight
@@ -265,7 +271,7 @@ Function Invoke-Borders() {
         }
         Write-Host $Full -ForegroundColor (Optimize-Colour -Colour $BorderColour)
         if ($Command) {
-            $ThisWorkingHeight = $WorkingHeight - ($Padding * 2)
+            $ThisWorkingHeight = $WorkingHeight + 1
         }
         else {
             $ThisWorkingHeight = $WorkingHeight + ($Padding * 2)
@@ -359,6 +365,8 @@ Function Set-Cursor() {
             $Cursor.X = $CommandX
             $Cursor.Y = $CommandY
             $psWindow.CursorPosition = $Cursor
+            Clear-CommandLine
+            $psWindow.CursorPosition = $Cursor
         }
         else {
             # Last line
@@ -372,7 +380,7 @@ Function Set-Cursor() {
 Function Optimize-WriteLength() {
     [CmdletBinding()]
     Param (
-        [Parameter(ValueFromPipeline)][array]$Value,
+        [Parameter(ValueFromPipeline)][string]$Value,
         [int]$WorkingWidth = $Settings.WorkingWidth
     )
     if (Confirm-Variable -Name "Settings") {
@@ -405,6 +413,7 @@ Function Write-Panel() {
         [int]$Padding = $Settings.Padding,
         [string]$Single = $Borders.Single,
         [ValidateSet("Black", "Blue", "Cyan", "DarkBlue", "DarkCyan", "DarkGray", "DarkGrey", "DarkGreen", "DarkMagenta", "DarkRed", "DarkYellow", "Gray", "Grey", "Green", "Magenta", "Red", "White", "Yellow")][string]$TextColour = $Settings.TextColour,
+        [ValidateSet("Black", "Blue", "Cyan", "DarkBlue", "DarkCyan", "DarkGray", "DarkGrey", "DarkGreen", "DarkMagenta", "DarkRed", "DarkYellow", "Gray", "Grey", "Green", "Magenta", "Red", "White", "Yellow")][string]$TitleColour = $Settings.TitleColour,
         [Parameter(ValueFromPipeline)][array]$Value,
         $X = $WorkAreas.X,
         $Y = $WorkAreas.Y,
@@ -412,7 +421,7 @@ Function Write-Panel() {
     )
     if (Confirm-Variable -Name "Settings", "Borders", "WorkAreas") {
         if ($Command) {
-            $WorkingHeight = $WorkingHeight - (($Padding * 3) + 2 <# Border and Command Line #>)
+            $WorkingHeight = $WorkingHeight - 2 <# Border and Command Line #>
         }
         if ($Panel -lt $NoOfPanelsX) {
             $X = $X[$Panel]
@@ -433,8 +442,26 @@ Function Write-Panel() {
         }
         foreach ($V in $Value) {
             Set-Cursor -X $X -Y $Y
-            $OptimisedValue = $V | Optimize-WriteLength
-            Write-Host "$OptimisedValue" -ForegroundColor (Optimize-Colour -Colour $TextColour) -NoNewline
+            $SplitColour = $false
+            if ($Horizontal) {
+                $OptimisedValue = $V
+            }
+            else {
+                $OptimisedValue = $V | Optimize-WriteLength
+                if ($OptimisedValue -like "*;;*") {
+                    $SplitColour = $true
+                    $SplitZero, $SplitRest = $OptimisedValue -split ";;"
+                    $Rest = $SplitRest -join ";;"
+                }
+            }
+            if ($SplitColour) {
+                foreach ($Char in [char[]]$SplitZero) {
+                    Write-Host "$Char" -ForegroundColor (Optimize-Colour -Colour $TitleColour) -NoNewline
+                }
+                Write-Host ": $Rest" -ForegroundColor (Optimize-Colour -Colour $TextColour) -NoNewline
+            } else {
+                Write-Host "$OptimisedValue" -ForegroundColor (Optimize-Colour -Colour $TextColour) -NoNewline
+            }
             $Y++
         }
         Set-Cursor
@@ -547,6 +574,9 @@ Function Set-Menu() {
         $Script:Menu = @()
         $Script:Menu += $true | Select-Object @{l = 'Value'; e = { Get-Greeting } }, @{l = 'Line'; e = { 0 } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TitleColour } }, @{l = 'Horizontal'; e = { $false } }
         $Script:Menu += $true | Select-Object @{l = 'Value'; e = { $false } }, @{l = 'Line'; e = { 2 } }, @{l = 'TextColour'; e = {} }, @{l = 'Horizontal'; e = { $true } }
+        $Script:Menu += $true | Select-Object @{l = 'Value'; e = { "1 - Get PC Details" } }, @{l = 'Line'; e = { 4 } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TextColour } }, @{l = 'Horizontal'; e = { $false } }
+        $Script:Menu += $true | Select-Object @{l = 'Value'; e = { "S - Get $($Settings.WindowTitle) Settings" } }, @{l = 'Line'; e = { 5 } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TextColour } }, @{l = 'Horizontal'; e = { $false } }
+        $Script:Menu += $true | Select-Object @{l = 'Value'; e = { "Q - Quit" } }, @{l = 'Line'; e = { 6 } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TextColour } }, @{l = 'Horizontal'; e = { $false } }
     }
 }
 
@@ -557,6 +587,7 @@ Function Get-Menu() {
         $Panel = $Settings.MenuPanel
     )
     if (Confirm-Variable -Name "Settings", "Menu") {
+        Compress-Menu
         foreach ($M in $Menu) {
             if ($M.Horizontal) {
                 Write-Panel -Horizontal -Line $M.Line -Panel $Panel
@@ -568,7 +599,17 @@ Function Get-Menu() {
     }
 }
 
-Function Add-ToMenu() {
+Function Compress-Menu() {
+    [CmdletBinding()]
+    Param (
+        $OldMenu = $Script:Menu
+    )
+    if (Confirm-Variable -Name "Menu") {
+        $Script:Menu = $OldMenu | Group-Object -Property Line | ForEach-Object { $_.Group | Select-Object -Last 1 }
+    }
+}
+
+Function Add-MenuItem() {
     [CmdletBinding()]
     Param (
         [switch]$Horizontal,
@@ -578,8 +619,99 @@ Function Add-ToMenu() {
         [array]$Value = $false
     )
     if (Confirm-Variable -Name "Settings", "Menu") {
+        Compress-Menu
         foreach ($V in $Value) {
             $Script:Menu += $V | Select-Object @{l = 'Value'; e = { $_ } }, @{l = 'Line'; e = { $Line } }, @{l = 'TextColour'; e = { Optimize-Colour -Colour $TextColour } }, @{l = 'Horizontal'; e = { $Horizontal } }
+        }
+    }
+}
+
+Function Clear-CommandLine() {
+    [CmdletBinding()]
+    Param (
+        $CommandWidth = $Script:Settings.CommandWidth
+    )
+    if (Confirm-Variable -Name "Settings") {
+        for ($x = 0; $x -lt $CommandWidth; $x++) {
+            $CommandClear += " "
+        }
+        Write-Host $CommandClear -NoNewline
+    }
+}
+
+Function Get-PCDetails {
+    [CmdletBinding()]
+    Param ()
+    $AllProcessor = Get-CimInstance -ClassName Win32_Processor | Select-Object Name, NumberOfCores, Status
+    $AllMemory = Get-CimInstance -ClassName Win32_PhysicalMemory | Select-Object Capacity
+    $Machine = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Manufacturer, Model, Name, Domain, Status, SystemType
+    $OSDetails = Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object Caption, LastBootUpTime, Manufacturer, Name, OSArchitecture, Status, Version
+    $AllDisks = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" | Select-Object DeviceID, FileSystem, FreeSpace, Size, VolumeName
+    $PCDetails = @()
+    $PCDetails += $AllProcessor.Count | Select-Object @{l = 'Detail'; e = { "CPU Count" } }, @{l = 'Value'; e = { $_ } }
+    $CPUNumber = 1
+    foreach ($Processor in $AllProcessor) {
+        $PCDetails += $Processor.Name | Select-Object @{l = 'Detail'; e = { "CPU $CPUNumber Name" } }, @{l = 'Value'; e = { $_ } }
+        $PCDetails += $Processor.NumberOfCores | Select-Object @{l = 'Detail'; e = { "CPU $CPUNumber No. of Cores" } }, @{l = 'Value'; e = { $_ } }
+        $PCDetails += $Processor.Status | Select-Object @{l = 'Detail'; e = { "CPU $CPUNumber Status" } }, @{l = 'Value'; e = { $_ } }
+        $CPUNumber++
+    }
+    if ($AllMemory.Count -eq 1) {
+        $PCDetails += $AllMemory.Capacity | Select-Object @{l = 'Detail'; e = { "Memory" } }, @{l = 'Value'; e = { "$($_ / 1GB)GB" } }
+    }
+    elseif ($AllMemory.Count -gt 1) {
+        $TotalMemoryCapacity = 0
+        foreach ($Memory in $AllMemory) {
+            $MemoryCapacity = ($Memory.Capacity / 1GB)
+            if ($TotalMemoryCapacity -eq 0) {
+                $MemoryCapacityDisplay = "$($MemoryCapacity)GB"
+            }
+            else {
+                $MemoryCapacityDisplay = "$MemoryCapacityDisplay + $($MemoryCapacity)GB"
+            }
+            $TotalMemoryCapacity = $TotalMemoryCapacity + $MemoryCapacity
+        }
+        $PCDetails += $TotalMemoryCapacity | Select-Object @{l = 'Detail'; e = { "Memory" } }, @{l = 'Value'; e = { "$($_)GB ($MemoryCapacityDisplay)" } }
+    }
+    $PCDetails += $Machine.Manufacturer | Select-Object @{l = 'Detail'; e = { "Machine Manufacturer" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $Machine.Model | Select-Object @{l = 'Detail'; e = { "Machine Model" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $Machine.Name | Select-Object @{l = 'Detail'; e = { "Machine Name" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $Machine.Domain | Select-Object @{l = 'Detail'; e = { "Machine Domain" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $Machine.Status | Select-Object @{l = 'Detail'; e = { "Machine Status" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $Machine.SystemType | Select-Object @{l = 'Detail'; e = { "Machine SystemType" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.Caption | Select-Object @{l = 'Detail'; e = { "OS Caption" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.LastBootUpTime | Select-Object @{l = 'Detail'; e = { "OS LastBootUpTime" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.Manufacturer | Select-Object @{l = 'Detail'; e = { "OS Manufacturer" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += ($OSDetails.Name).Split("|")[2] | Select-Object @{l = 'Detail'; e = { "OS Device" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += ($OSDetails.Name).Split("|")[1] | Select-Object @{l = 'Detail'; e = { "OS Location" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.OSArchitecture | Select-Object @{l = 'Detail'; e = { "OS Architecture" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.Status | Select-Object @{l = 'Detail'; e = { "OS Status" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $OSDetails.Version | Select-Object @{l = 'Detail'; e = { "OS Version" } }, @{l = 'Value'; e = { $_ } }
+    $PCDetails += $AllDisks.Count | Select-Object @{l = 'Detail'; e = { "Disk Count" } }, @{l = 'Value'; e = { $_ } }
+    $DiskNumber = 1
+    foreach ($Disk in $AllDisks) {
+        $DiskSize = [int][Math]::Round($Disk.Size / 1GB)
+        $DiskFreeSpace = [int][Math]::Round($Disk.FreeSpace / 1GB)
+        $DiskUsedSpace = $DiskSize - $DiskFreeSpace
+        $DiskPercentRemaining = [int][Math]::Round(($DiskFreeSpace / $DiskSize) * 100)
+        $PCDetails += "$($Disk.DeviceID) ($($Disk.VolumeName))" | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber ID" } }, @{l = 'Value'; e = { $_ } }
+        $PCDetails += $Disk.FileSystem | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber FileSystem" } }, @{l = 'Value'; e = { $_ } }
+        $PCDetails += $DiskUsedSpace | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber Used" } }, @{l = 'Value'; e = { "$($_)GB" } }
+        $PCDetails += $DiskFreeSpace | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber Free" } }, @{l = 'Value'; e = { "$($_)GB" } }
+        $PCDetails += $DiskSize | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber Size" } }, @{l = 'Value'; e = { "$($_)GB" } }
+        $PCDetails += $DiskPercentRemaining | Select-Object @{l = 'Detail'; e = { "Disk $DiskNumber Percent Free" } }, @{l = 'Value'; e = { "$($_)%" } }
+        $DiskNumber++
+    }
+    $PCDCount = 0
+    $Panel = 0
+    foreach ($PCD in $PCDetails) {
+        if ($Panel -lt ($Settings.NoOfPanelsX - 1) -and $PCDCount -le $Settings.WorkingHeight) {
+            Write-Panel -Value "$($PCD.Detail);;$($PCD.Value)" -Line $PCDCount -Panel $Panel
+        }
+        $PCDCount++
+        if ($PCDCount -gt $Settings.WorkingHeight) {
+            $PCDCount = 0
+            $Panel++
         }
     }
 }
@@ -589,16 +721,45 @@ Get-Settings -Command -Username "Fifteen" -ConsoleBeep | Out-Null
 Start-Display
 Get-WorkAreas
 Set-Menu
-$l = 7
+$MenuItems = @('D1', 'NumPad1', 'S', 'Q')
 Do {
-    Clear-Host
-    Invoke-Borders
-    Get-Menu
-    Set-Cursor
+    if ($Key) {
+        Clear-Host
+        Invoke-Borders
+        Get-Menu
+        Set-Cursor
+        switch ($Key) {
+            'D1' {
+                Get-PCDetails
+            }
+            'NumPad1' {
+                Get-PCDetails
+            }
+            'S' {
+                $SCount = 0
+                $Panel = 0
+                foreach ($S in ($Settings.GetEnumerator() | Sort-Object Name)) {
+                    if ($Panel -lt ($Settings.NoOfPanelsX - 1) -and $SCount -le $Settings.WorkingHeight) {
+                        Write-Panel -Value "$($S.Name);;$($S.Value)" -Line $SCount -Panel $Panel
+                    }
+                    $SCount++
+                    if ($SCount -gt $Settings.WorkingHeight) {
+                        $SCount = 0
+                        $Panel++
+                    }
+                }
+            }
+            Default {}
+        }
+    }
+    if ($MenuItems -notcontains $Key) {
+        Clear-Host
+        Invoke-Borders
+        Get-Menu
+        Set-Cursor
+        if ($Key) {
+            # Write-Host "(Option: $Key) " -ForegroundColor Green -NoNewline
+        }
+    }
     $Key = Get-PauseCommand
-    Add-ToMenu -Value "Test $l" -Line $l -TextColour Red
-    $l++
-    $l++
-    Add-ToMenu -Line $l -Horizontal
-    $l++
 } Until ($Key -eq "Q")
