@@ -560,6 +560,7 @@ Function Get-Greeting() {
         else {
             $Greeting = "Hello, $($Settings.Username)."
         }
+        $Greeting | Out-Vocal
         Return $Greeting
     }
 }
@@ -716,10 +717,22 @@ Function Get-PCDetails {
     }
 }
 
+Function Out-Vocal() {
+    [CmdletBinding()]
+    Param (
+        [Parameter(ValueFromPipeline,Mandatory=$true)][String]$Say
+    )
+    Start-Job -ScriptBlock {
+        $Speaker = New-Object -ComObject "SAPI.SpVoice"
+        $Voices = $Speaker.GetVoices()
+        $Speaker.Voice = $Voices.Item(1)
+        $Speaker.Speak($args[0], 0)} -ArgumentList $Say | Out-Null
+}
+
 Invoke-Promotion
 Get-Settings -Command -Username "Fifteen" -ConsoleBeep | Out-Null
 Start-Display
-Get-WorkAreas
+Get-WorkAreas | Out-Null
 Set-Menu
 $MenuItems = @('D1', 'NumPad1', 'S', 'Q')
 Do {
